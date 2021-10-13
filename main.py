@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask, make_response, request
+from werkzeug.exceptions import HTTPException
+from flask import Flask, make_response, request, json
 
 import pymongo
 
@@ -13,7 +14,13 @@ def get_pokemon():
     db = client.ApiDB
     collection = db.Pokemon
 
-    return make_response(str(collection.find_one({"Name": "Salamèche"})), 200)
+    test = []
+    body = ""
+    for x in collection.find():
+        test.append(x)
+        body = f'{body} {x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+
+    return make_response(body, 200)
 
 
 @app.route('/pokemon', methods=['POST'])
@@ -42,6 +49,20 @@ def delete_pokemon():
     os.remove(f'pokemon/{request.args["id"]}.txt')
     return make_response(body, 200)
 
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    """
+    Return a JSON object with error details.
+    """
+    response = e.get_response()
+    response.data = json.dumps({
+        "Code d'erreur": e.code,
+        "Nom de l'erreur": e.name,
+        "Description de l'erreur": e.description,
+    })
+    response.content_type = "application/json"
+    return make_response(response, 200)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8001, debug=True)
