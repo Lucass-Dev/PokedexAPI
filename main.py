@@ -1,4 +1,6 @@
 import os
+import copy
+import datetime
 
 from werkzeug.exceptions import HTTPException
 from flask import Flask, make_response, request, json
@@ -7,12 +9,13 @@ import pymongo
 
 app = Flask(__name__)
 
+client = pymongo.MongoClient("mongodb+srv://poke1:passwordpoke1@clusterpokedex.irn89.mongodb.net/ApiDB?retryWrites=true&w=majority")
+db = client.ApiDB
+collection = db.Pokemon
 
 @app.route('/', methods=['GET'])
 def get_pokemon():
-    client = pymongo.MongoClient("mongodb+srv://poke1:passwordpoke1@clusterpokedex.irn89.mongodb.net/ApiDB?retryWrites=true&w=majority")
-    db = client.ApiDB
-    collection = db.Pokemon
+
 
     test = []
     body = ""
@@ -25,12 +28,14 @@ def get_pokemon():
 
 @app.route('/pokemon', methods=['POST'])
 def create_pokemon():
-    body = request.get_json()
-    data = body["fname"] + '\n' + body["lname"]
-    file = open(f'pokemon/{request.args["id"]}.txt', 'a')
-    file.write(f'{data}')
-    file.close()
-    return make_response(body, 200)
+    post = request.get_json()
+    x = datetime.datetime.now()
+    date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
+        "%H") + ':' + x.strftime("%M")
+    post["Date"]= date
+    test = copy.copy(post)
+    collection.insert_one(test)
+    return make_response(post, 200)
 
 
 @app.route('/pokemon', methods=['PATCH'])
