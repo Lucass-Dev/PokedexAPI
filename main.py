@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
-def get_users():
+def get_pokemon():
     client = pymongo.MongoClient("mongodb+srv://poke1:passwordpoke1@clusterpokedex.irn89.mongodb.net/ApiDB?retryWrites=true&w=majority")
     db = client.ApiDB
     collection = db.Pokemon
@@ -16,30 +16,30 @@ def get_users():
     return make_response(str(collection.find_one({"Name": "Salamèche"})), 200)
 
 
-@app.route('/users', methods=['POST'])
-def create_user():
+@app.route('/pokemon', methods=['POST'])
+def create_pokemon():
     body = request.get_json()
     data = body["fname"] + '\n' + body["lname"]
-    file = open(f'users/{request.args["id"]}.txt', 'a')
+    file = open(f'pokemon/{request.args["id"]}.txt', 'a')
     file.write(f'{data}')
     file.close()
     return make_response(body, 200)
 
 
-@app.route('/users', methods=['PATCH'])
-def change_user():
+@app.route('/pokemon', methods=['PATCH'])
+def change_pokemon():
     body = request.get_json()
     data = body["fname"] + '\n' + body["lname"]
-    file = open(f'users/{request.args["id"]}.txt', 'w')
+    file = open(f'pokemon/{request.args["id"]}.txt', 'w')
     file.write(f'{data}')
     file.close()
     return make_response(body, 200)
 
 
-@app.route('/users', methods=['DELETE'])
-def delete_user():
+@app.route('/pokemon', methods=['DELETE'])
+def delete_pokemon():
     body = "User deleted!"
-    os.remove(f'users/{request.args["id"]}.txt')
+    os.remove(f'pokemon/{request.args["id"]}.txt')
     return make_response(body, 200)
 
 
