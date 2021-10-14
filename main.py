@@ -40,12 +40,17 @@ def create_pokemon():
 
 @app.route('/pokemon', methods=['PATCH'])
 def change_pokemon():
-    body = request.get_json()
-    data = body["fname"] + '\n' + body["lname"]
-    file = open(f'pokemon/{request.args["id"]}.txt', 'w')
-    file.write(f'{data}')
-    file.close()
-    return make_response(body, 200)
+    post = request.get_json()
+    x = datetime.datetime.now()
+    date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
+        "%H") + ':' + x.strftime("%M")
+    post["Date"] = date
+
+    if collection.find_one({"Name": request.args["name"]}) == None:
+        return f'No such pokemon with that name : {request.args["name"]}'
+
+    collection.find_one_and_replace({"Name": request.args["name"]}, post)
+    return make_response(post, 200)
 
 
 @app.route('/pokemon', methods=['DELETE'])
