@@ -24,9 +24,9 @@ def get_all_pokemon():
     """
     test = []
     body = ""
-    for x in collection.find():
+    for x in collection.find().sort("Name"):
         test.append(x)
-        body = f'{body}\n{x["_id"], x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
 
     return make_response(body, 200)
 
@@ -41,12 +41,12 @@ def get_pokemon_by_type():
     body = ""
     for x in collection.find({"Type": request.args["type"]}):
         test.append(x)
-        body = f'{body} {x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
 
     return make_response(body, 200)
 
 
-@app.route('/by_name', methods=['GET'])
+@app.route('/get_by_name', methods=['GET'])
 def get_pokemon_by_name():
     """
     Calling our database to get all pokemons that matches with the given argument
@@ -56,7 +56,7 @@ def get_pokemon_by_name():
     body = ""
     for x in collection.find({"Name": request.args["name"]}):
         test.append(x)
-        body = f'{body}\n{x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
 
     return make_response(body, 200)
 
