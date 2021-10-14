@@ -37,7 +37,7 @@ def get_pokemon_by_type():
     return make_response(body, 200)
 
 
-@app.route('/get_by_name', methods=['GET'])
+@app.route('/by_name', methods=['GET'])
 def get_pokemon_by_name():
     test = []
     body = ""
