@@ -1,12 +1,12 @@
 import os
 import copy
 import datetime
-
 import werkzeug
+import pymongo
+
+from bson.objectid import ObjectId
 from werkzeug.exceptions import HTTPException
 from flask import Flask, make_response, request, json
-
-import pymongo
 
 app = Flask(__name__)
 
@@ -26,7 +26,7 @@ def get_all_pokemon():
     body = ""
     for x in collection.find():
         test.append(x)
-        body = f'{body}\n{x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n{x["_id"], x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
 
     return make_response(body, 200)
 
@@ -102,9 +102,9 @@ def delete_pokemon():
     Method to delete a pokemon from our database, using his name as argument to identify wich one we have to delete
     :return: a sentence with the deleted pokemon's name
     """
-    pok_name = request.args["name"]
-    body = "User deleted: " + f'{pok_name}'
-    collection.find_one_and_delete({"Name": pok_name})
+    pok_ID = request.args["id"]
+    body = "User deleted: " + f'{pok_ID}'
+    collection.find_one_and_delete({"_id": ObjectId(pok_ID)})
     return make_response(body, 200)
 
 
