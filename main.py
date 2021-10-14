@@ -32,7 +32,7 @@ def create_pokemon():
     x = datetime.datetime.now()
     date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
         "%H") + ':' + x.strftime("%M")
-    post["Date"]= date
+    post["Date"] = date
     test = copy.copy(post)
     collection.insert_one(test)
     return make_response(post, 200)
@@ -50,24 +50,16 @@ def change_pokemon():
 
 @app.route('/pokemon', methods=['DELETE'])
 def delete_pokemon():
-    body = "User deleted!"
-    os.remove(f'pokemon/{request.args["id"]}.txt')
+    pok_name = request.args["name"]
+    body = "User deleted: " + f'{pok_name}'
+    collection.find_one_and_delete({"Name": pok_name})
     return make_response(body, 200)
 
 
-@app.errorhandler(HTTPException)
-def handle_exception(e):
-    """
-    Return a JSON object with error details.
-    """
-    response = e.get_response()
-    response.data = json.dumps({
-        "Code d'erreur": e.code,
-        "Nom de l'erreur": e.name,
-        "Description de l'erreur": e.description,
-    })
-    response.content_type = "application/json"
-    return make_response(response, 200)
+
+@app.errorhandler(Exception)
+def basic_error(e):
+    return "Erreur rencontrée: " + str(e)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8001, debug=True)
