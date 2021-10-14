@@ -21,7 +21,7 @@ def get_all_pokemon():
     body = ""
     for x in collection.find():
         test.append(x)
-        body = f'{body} {x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n{x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
 
     return make_response(body, 200)
 
@@ -43,7 +43,7 @@ def get_pokemon_by_name():
     body = ""
     for x in collection.find({"Name": request.args["name"]}):
         test.append(x)
-        body = f'{body} {x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
+        body = f'{body}\n{x["Name"], x["Type"], x["Stat"], x["Date"], x["Description"]}'
 
     return make_response(body, 200)
 
