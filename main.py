@@ -2,6 +2,7 @@ import os
 import copy
 import datetime
 
+import werkzeug
 from werkzeug.exceptions import HTTPException
 from flask import Flask, make_response, request, json
 
@@ -17,6 +18,10 @@ collection = db.Pokemon
 
 @app.route('/get_all', methods=['GET'])
 def get_all_pokemon():
+    """
+    Calling our database to get all pokemons inside the collection.
+    :return: a list that contains all pokemons
+    """
     test = []
     body = ""
     for x in collection.find():
@@ -28,6 +33,10 @@ def get_all_pokemon():
 
 @app.route('/get_by_type', methods=['GET'])
 def get_pokemon_by_type():
+    """
+    Calling our database to get all pokemons that matches with the given argument
+    :return: a list that contains all pokemons
+    """
     test = []
     body = ""
     for x in collection.find({"Type": request.args["type"]}):
@@ -39,6 +48,10 @@ def get_pokemon_by_type():
 
 @app.route('/by_name', methods=['GET'])
 def get_pokemon_by_name():
+    """
+    Calling our database to get all pokemons that matches with the given argument
+    :return: a list that contains all pokemons
+    """
     test = []
     body = ""
     for x in collection.find({"Name": request.args["name"]}):
@@ -50,6 +63,10 @@ def get_pokemon_by_name():
 
 @app.route('/create_pokemon', methods=['POST'])
 def create_pokemon():
+    """
+    Method to insert pokemon inside our database using JSON object.
+    :return: The added pokemon
+    """
     post = request.get_json()
     x = datetime.datetime.now()
     date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
@@ -62,6 +79,10 @@ def create_pokemon():
 
 @app.route('/change_pokemon', methods=['PATCH'])
 def change_pokemon():
+    """
+    Method to edit a pokemon in the database using is name as argument to identify wich one to edit
+    :return: the edited pokemon
+    """
     post = request.get_json()
     x = datetime.datetime.now()
     date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
@@ -77,16 +98,46 @@ def change_pokemon():
 
 @app.route('/delete_pokemon', methods=['DELETE'])
 def delete_pokemon():
+    """
+    Method to delete a pokemon from our database, using his name as argument to identify wich one we have to delete
+    :return: a sentence with the deleted pokemon's name
+    """
     pok_name = request.args["name"]
     body = "User deleted: " + f'{pok_name}'
     collection.find_one_and_delete({"Name": pok_name})
     return make_response(body, 200)
 
 
-
-@app.errorhandler(Exception)
+@app.errorhandler(KeyError)
+@app.errorhandler(TypeError)
+@app.errorhandler(ValueError)
 def basic_error(e):
+    """
+    basic method that return a message in case of error
+    :param e: the current error
+    :return: message in case of error
+    """
     return "Erreur rencontrée: " + str(e)
+
+
+@app.errorhandler(HTTPException)
+def http_error(e):
+    """
+    method that return a message in case of error
+    :param e: the current error
+    :return: message in case of error
+    """
+    return 'Erreur rencontrée : ' + str(e)
+
+
+@app.errorhandler(werkzeug.exceptions.BadRequestKeyError)
+def req_key_error(e):
+    """
+    basic method that return a message in case of error
+    :param e: the current error
+    :return: message in case of error
+    """
+    return 'Il manque un argument : ' + str(e)
 
 
 if __name__ == '__main__':
