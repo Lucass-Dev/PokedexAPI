@@ -1,4 +1,5 @@
 import os
+import re
 import copy
 import datetime
 import werkzeug
@@ -24,9 +25,32 @@ def get_all_pokemon():
     """
     test = []
     body = ""
-    for x in collection.find().sort("Name"):
-        test.append(x)
-        body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+
+    if request.args["sortBy"] == "name":
+        for x in collection.find().sort("Name"):
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+    elif request.args["sortBy"] == "vie":
+        for x in collection.find().sort("Stat.Vie"):
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+    elif request.args["sortBy"] == "atk":
+        for x in collection.find().sort("Stat.ATK"):
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+    elif request.args["sortBy"] == "def":
+        for x in collection.find().sort("Stat.DEF"):
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+    elif request.args["sortBy"] == "vitesse":
+        for x in collection.find().sort("Stat.Vitesse"):
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+    elif request.args["sortBy"] == "none":
+        for x in collection.find():
+            test.append(x)
+            body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
+
 
     return make_response(body, 200)
 
@@ -39,7 +63,7 @@ def get_pokemon_by_type():
     """
     test = []
     body = ""
-    for x in collection.find({"Type": request.args["type"]}):
+    for x in collection.find({"Type": {'$regex': re.compile(request.args["type"], re.IGNORECASE)}}):
         test.append(x)
         body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
 
@@ -54,7 +78,7 @@ def get_pokemon_by_name():
     """
     test = []
     body = ""
-    for x in collection.find({"Name": request.args["name"]}):
+    for x in collection.find({"Name": {'$regex': re.compile(request.args["name"], re.IGNORECASE)}}):
         test.append(x)
         body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
 
