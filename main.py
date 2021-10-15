@@ -25,7 +25,6 @@ def get_all_pokemon():
     """
     test = []
     body = ""
-
     if request.args["sortBy"] == "name":
         for x in collection.find().sort("Name"):
             test.append(x)
@@ -63,10 +62,11 @@ def get_pokemon_by_type():
     """
     test = []
     body = ""
-    for x in collection.find({"Type": {'$regex': re.compile(request.args["type"], re.IGNORECASE)}}):
+    for x in collection.find({"Type": {'$regex': re.compile(request.args["type"], re.IGNORECASE)}}).sort('Name'):
         test.append(x)
         body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
-
+    if body == "":
+        body = "No pokemon found with that name"
     return make_response(body, 200)
 
 
@@ -78,10 +78,11 @@ def get_pokemon_by_name():
     """
     test = []
     body = ""
-    for x in collection.find({"Name": {'$regex': re.compile(request.args["name"], re.IGNORECASE)}}):
+    for x in collection.find({"Name": {'$regex': re.compile(request.args["name"], re.IGNORECASE)}}).sort('Name'):
         test.append(x)
         body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
-
+    if body == "":
+        body = "No pokemon found with that name"
     return make_response(body, 200)
 
 
@@ -98,7 +99,8 @@ def create_pokemon():
     post["Date"] = date
     test = copy.copy(post)
     collection.insert_one(test)
-    return make_response(post, 200)
+    body = "Pokemon created: " + post
+    return make_response(body, 200)
 
 
 @app.route('/change_pokemon', methods=['PATCH'])
@@ -112,12 +114,11 @@ def change_pokemon():
     date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
         "%H") + ':' + x.strftime("%M")
     post["Date"] = date
-
     if collection.find_one({"Name": request.args["name"]}) == None:
         return f'No such pokemon with that name : {request.args["name"]}'
-
     collection.find_one_and_replace({"Name": request.args["name"]}, post)
-    return make_response(post, 200)
+    body = "Pokemon edited: " + post
+    return make_response(body, 200)
 
 
 @app.route('/delete_pokemon', methods=['DELETE'])
@@ -127,7 +128,7 @@ def delete_pokemon():
     :return: a sentence with the deleted pokemon's name
     """
     pok_ID = request.args["id"]
-    body = "User deleted: " + f'{pok_ID}'
+    body = "Pokemon deleted: " + f'{pok_ID}'
     collection.find_one_and_delete({"_id": ObjectId(pok_ID)})
     return make_response(body, 200)
 
@@ -135,6 +136,7 @@ def delete_pokemon():
 @app.errorhandler(KeyError)
 @app.errorhandler(TypeError)
 @app.errorhandler(ValueError)
+@app.errorhandler(Exception)
 def basic_error(e):
     """
     basic method that return a message in case of error
