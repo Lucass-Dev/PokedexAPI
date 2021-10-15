@@ -4,7 +4,7 @@ import copy
 import datetime
 import werkzeug
 import pymongo
-
+import json
 from bson.objectid import ObjectId
 from werkzeug.exceptions import HTTPException
 from flask import Flask, make_response, request, json
@@ -15,6 +15,10 @@ client = pymongo.MongoClient("mongodb+srv://poke1:passwordpoke1@clusterpokedex.i
                              "=true&w=majority")
 db = client.ApiDB
 collection = db.Pokemon
+
+@app.route('/')
+def home():
+    return '<h1>This is our home page</h1>'
 
 
 @app.route('/get_all', methods=['GET'])
@@ -45,12 +49,10 @@ def get_all_pokemon():
         for x in collection.find().sort("Stat.Vitesse"):
             test.append(x)
             body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
-    elif request.args["sortBy"] == "none":
+    elif request.args["sortBy"] == "":
         for x in collection.find():
             test.append(x)
             body = f'{body}\n\n{x["_id"]} \n {x["Name"]} \n {x["Type"]} \n {x["Stat"]} \n {x["Date"]} \n {x["Description"]}'
-
-
     return make_response(body, 200)
 
 
@@ -94,7 +96,7 @@ def create_pokemon():
     """
     post = request.get_json()
     x = datetime.datetime.now()
-    date = x.strftime("%w") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
+    date = x.strftime("%d") + '/' + x.strftime("%m") + '/' + x.strftime("%Y") + ' > ' + x.strftime(
         "%H") + ':' + x.strftime("%M")
     post["Date"] = date
     test = copy.copy(post)
